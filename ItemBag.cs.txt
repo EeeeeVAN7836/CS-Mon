@@ -1,0 +1,68 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ItemBag : MonoBehaviour
+{
+    // define the max number of items in the bag
+    private int maxItems = 20;
+
+    // create dictionary to store the items and amt
+    private Dictionary<string, int> itemDict = new Dictionary<string, int>();
+
+    // add an item to the bag
+    public void AddItem(string itemName, int quantity)
+    {
+        // check if the item already exists
+        if (itemDict.ContainsKey(itemName))
+        {
+            itemDict[itemName] += quantity;
+        }
+        else
+        {
+            // add to bag if item doesn't exist
+            itemDict.Add(itemName, quantity);
+        }
+    }
+
+    // remove an item from the bag
+    public void RemoveItem(string itemName, int quantity)
+    {
+        // check if the item exists
+        if (itemDict.ContainsKey(itemName))
+        {
+            itemDict[itemName] -= quantity;
+
+            // remove item from bag if it goes below 0
+            if (itemDict[itemName] <= 0)
+            {
+                itemDict.Remove(itemName);
+            }
+        }
+    }
+
+    // get number of a certain item in bag
+    public int GetQuantity(string itemName)
+    {
+        if (itemDict.ContainsKey(itemName))
+        {
+            return itemDict[itemName];
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    // check if bag iis full
+    public bool IsFull()
+    {
+        return (itemDict.Count >= maxItems);
+    }
+
+    // clear the bag
+    public void Clear()
+    {
+        itemDict.Clear();
+    }
+}

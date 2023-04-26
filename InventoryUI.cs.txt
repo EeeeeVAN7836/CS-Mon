@@ -1,0 +1,80 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class InventoryUI : MonoBehaviour
+{
+    public ItemBag itemBag; // refer to ItemBag script
+    public GameObject itemSlotPrefab; // refer to prefab for itemslot
+    public GameObject useButtonPrefab; // refer to prefab for use button
+    public GameObject discardButtonPrefab; // refer to prefab for discard button
+
+    public Transform contentPanel; // refer to panel holding item slots
+
+    private List<GameObject> itemSlots = new List<GameObject>(); 
+
+    // refresh inventory UI
+    public void Refresh()
+    {
+        // destroy all item slots
+        foreach (GameObject slot in itemSlots)
+        {
+            Destroy(slot);
+        }
+        itemSlots.Clear();
+
+        // create new item slot for each new item
+        foreach (KeyValuePair<string, int> item in itemBag.GetItems())
+        {
+            // instantiate item slot prefab
+            GameObject slot = Instantiate(itemSlotPrefab);
+            slot.transform.SetParent(contentPanel, false);
+
+            // set item slot text to its name and amount
+            Text[] texts = slot.GetComponentsInChildren<Text>();
+            texts[0].text = item.Key;
+            texts[1].text = "x " + item.Value.ToString();
+
+            // instantiate use button prefab
+            GameObject useButton = Instantiate(useButtonPrefab);
+            useButton.transform.SetParent(slot.transform, false);
+            Button useButtonComponent = useButton.GetComponent<Button>();
+            useButtonComponent.onClick.AddListener(delegate { UseItem(item.Key); });
+
+            // instantiate discard button prefab
+            GameObject discardButton = Instantiate(discardButtonPrefab);
+            discardButton.transform.SetParent(slot.transform, false);
+            Button discardButtonComponent = discardButton.GetComponent<Button>();
+            discardButtonComponent.onClick.AddListener(delegate { DiscardItem(item.Key); });
+
+            itemSlots.Add(slot);
+        }
+    }
+
+    // use item from bag
+    public void UseItem(string itemName)
+    {
+       
+        Debug.Log("Using " + itemName);
+
+        // remove item from the bag
+        itemBag.RemoveItem(itemName, 1);
+
+        // refresh inventory UI
+        Refresh();
+    }
+
+    // discard item from bag
+    public void DiscardItem(string itemName)
+    {
+        
+        Debug.Log("Discarding " + itemName);
+
+        // remove item from the bag
+        itemBag.RemoveItem(itemName, 1);
+
+        // refresh inventory UI
+        Refresh();
+    }
+}
