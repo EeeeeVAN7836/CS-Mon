@@ -1,0 +1,102 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class InventoryUI : MonoBehaviour
+{
+    public Text itemText;
+    public Text itemDescriptionText;
+    public Button useButton;
+    public Button discardButton;
+    public Dropdown sortDropdown;
+    public InputField filterInputField;
+    public Dropdown categoryDropdown;
+
+    private List<Item> inventoryItems = new List<Item>(); // inventory item list
+    private List<Item> filteredItems = new List<Item>(); // filtered item list
+    private List<Item> categorizedItems = new List<Item>(); // categorized item list
+    private Item selectedItem; // item thats currently selected
+
+    // define sorting criteria
+    private enum SortCriteria
+    {
+        Name,
+        Type,
+        Quantity
+    }
+
+    // define item category
+    private enum ItemCategory
+    {
+        All,
+        Healing,
+        Battle,
+        Status,
+        Escape
+    }
+
+    void Start()
+    {
+        // initialize dropdown options
+        sortDropdown.options.Clear();
+        sortDropdown.options.Add(new Dropdown.OptionData("Name"));
+        sortDropdown.options.Add(new Dropdown.OptionData("Type"));
+        sortDropdown.options.Add(new Dropdown.OptionData("Quantity"));
+
+        // ititialize category dropdown options
+        categoryDropdown.options.Clear();
+        categoryDropdown.options.Add(new Dropdown.OptionData("All"));
+        categoryDropdown.options.Add(new Dropdown.OptionData("Healing"));
+        categoryDropdown.options.Add(new Dropdown.OptionData("Battle"));
+        categoryDropdown.options.Add(new Dropdown.OptionData("Status"));
+        categoryDropdown.options.Add(new Dropdown.OptionData("Escape"));
+
+        // add listeners to use and discard button
+        useButton.onClick.AddListener(OnUseButtonClicked);
+        discardButton.onClick.AddListener(OnDiscardButtonClicked);
+
+        // add listener to sort dropdown
+        sortDropdown.onValueChanged.AddListener(OnSortDropdownValueChanged);
+
+        // add listener to filter input field
+        filterInputField.onValueChanged.AddListener(OnFilterInputFieldValueChanged);
+
+        // add listener to category dropdown
+        categoryDropdown.onValueChanged.AddListener(OnCategoryDropdownValueChanged);
+
+        // put initial items in inventory
+        inventoryItems.Add(new Item("Potion", "Healing", 10, "A medicine that heals a Pokemon by 20 HP."));
+        inventoryItems.Add(new Item("Antidote", "Status", 5, "A spray-type medicine that heals a Pokemon of poisoning."));
+        inventoryItems.Add(new Item("Escape Rope", "Escape", 3, "A long and durable rope. Use it to escape instantly from a cave or a dungeon."));
+
+        // update UI display
+        UpdateInventoryUI();
+    }
+
+    // update inventory UI display
+    void UpdateInventoryUI()
+    {
+        // sort inventory items
+        SortCriteria sortCriteria = (SortCriteria)sortDropdown.value;
+        switch (sortCriteria)
+        {
+            case SortCriteria.Name:
+                inventoryItems.Sort((a, b) => a.name.CompareTo(b.name));
+                break;
+            case SortCriteria.Type:
+                inventoryItems.Sort((a, b) => a.type.CompareTo(b.type));
+                break;
+            case SortCriteria.Quantity:
+                inventoryItems.Sort((a, b) => a.quantity.CompareTo(b.quantity));
+                break;
+        }
+
+        // update filtered items list based on the filter value
+        string filterValue = filterInputField.text.ToLower();
+        filteredItems.Clear();
+        foreach (Item item in inventoryItems)
+        {
+            if (item.name.ToLower().Contains(filterValue))
+            {
+                filteredItems.Add(item);
+            }
